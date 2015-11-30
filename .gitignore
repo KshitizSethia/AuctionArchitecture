@@ -1,4 +1,9 @@
 *.class
+.settings
+.classpath
+bin
+log.txt
+team_details.txt
 
 # Mobile Tools for Java (J2ME)
 .mtj.tmp/
