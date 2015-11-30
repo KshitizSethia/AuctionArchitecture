@@ -1,4 +1,4 @@
-package auction.infrastructure.impl;
+package auction.common;
 
 public enum Error {
   BID_DUPLICATE("Bid alredy placed for this round"),

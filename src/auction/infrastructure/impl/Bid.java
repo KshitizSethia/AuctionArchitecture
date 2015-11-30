@@ -1,4 +1,4 @@
-package auction.common;
+package auction.infrastructure.impl;
 
 public class Bid {
 
@@ -6,13 +6,14 @@ public class Bid {
   public final float  amount;
   public final int    itemIndex;
   public final float  timeTakenToBid;
-  // public final String itemType;
+  public final String itemType;
 
   public Bid(String authID, int itemIndex, String itemType, float amount,
       float timeTakenToBid) {
     this.authID = authID;
     this.amount = amount;
     this.itemIndex = itemIndex;
+    this.itemType = itemType;
     this.timeTakenToBid = timeTakenToBid;
   }
 
@@ -30,7 +31,7 @@ public class Bid {
   @Override
   public String toString() {
     return String.format(
-        "(Player auth: %s, amount: %f, itemIndex: %d, timeTakenToBid: %f)",
-        authID, amount, itemIndex, timeTakenToBid);
+        "(Player auth: %s, amount: %f, itemIndex: %d, itemType: %s, timeTakenToBid: %f)",
+        authID, amount, itemIndex, itemType, timeTakenToBid);
   }
 }

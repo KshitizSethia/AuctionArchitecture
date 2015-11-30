@@ -7,7 +7,8 @@ import java.net.InetAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
 
-import auction.common.Bid;
+import auction.common.BiddersBid;
+import auction.common.Error;
 import auction.common.ReadOnlyAuctionState;
 import auction.common.Settings;
 
@@ -45,22 +46,27 @@ public class BidderConnector {
 
       ReadOnlyAuctionState auctionState =
           new ReadOnlyAuctionState(incomingMessage);
-      Bid bid = bidder.getBid(auctionState);
+      BiddersBid bid = bidder.getBid(auctionState);
       Log.info("sending bid: " + bid.toString());
-      out.writeUTF(bid.toString());
+      out.writeUTF(bid.toString() + "\n");
       out.flush();
 
       String response = in.readUTF();
-      while (!response.equals(Settings.BID_ACCEPTED)) {
+      if (response.contains(Settings.BID_ACCEPTED)) {
+        Log.info("Bid has been accepted");
+        bidder.decrementCash(bid.amount);
+      } else {
         Log.severe("bid not accepted, error message: " + response);
-        Log.info("trying to bid again");
-        bid = bidder.getBid(auctionState);
-        Log.info("sending bid: " + bid.toString());
-        out.writeUTF(bid.toString());
-        out.flush();
-      }
-      Log.info("Bid has been accepted");
 
+        /**
+         * You can use the error code here to debug what you are doing
+         */
+        Error error = Error.valueOf(response);
+        if (error == Error.PLAYER_NOT_ENOUGH_CASH
+            || error == Error.PLAYER_TIME_OUT) {
+          gameOn = false;
+        }
+      }
     }
 
     Log.info("Bidder is exiting!");

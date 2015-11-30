@@ -1,6 +1,5 @@
 package auction.infrastructure.impl;
 
-import auction.common.Bid;
 import auction.common.Settings;
 
 public class Player implements IAuctionPlayer {
@@ -88,7 +87,7 @@ public class Player implements IAuctionPlayer {
   @Override
   public String getGameState() {
     synchronized (lock) {
-      return model.toString();
+      return model.getStatus();
     }
   }
 

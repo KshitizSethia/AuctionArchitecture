@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Scanner;
 
 import auction.common.AuctionItem;
-import auction.common.Bid;
+import auction.common.Error;
 
 public class AuctionState {
 
@@ -210,7 +210,7 @@ public class AuctionState {
     }
 
     for (IAuctionPlayer player : players) {
-      if (bid.authID == player.getAuthId()) {
+      if (bid.authID.equals(player.getAuthId())) {
 
         // verify if player has cash to pay if bid goes through
         // todo let player place another bid

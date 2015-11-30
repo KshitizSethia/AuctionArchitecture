@@ -19,7 +19,7 @@ public final class AuctionItem {
       float winningAmount) {
     this.index = index;
     this.type = type;
-    if (winnerName != NO_WINNER) {
+    if (!winnerName.equals(NO_WINNER)) {
       this.winnerSet = true;
       this.winnerName = winnerName;
       this.winningAmount = winningAmount;

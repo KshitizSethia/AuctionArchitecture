@@ -1,6 +1,5 @@
 package auction.infrastructure.impl;
 
-import auction.common.Bid;
 import auction.infrastructure.api.IAuctionListener;
 
 public interface IAuctionPlayer extends IAuctionListener {

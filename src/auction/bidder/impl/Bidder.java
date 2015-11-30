@@ -3,7 +3,7 @@ package auction.bidder.impl;
 import java.util.Random;
 
 import auction.common.AuctionItem;
-import auction.common.Bid;
+import auction.common.BiddersBid;
 import auction.common.ReadOnlyAuctionState;
 import auction.common.Settings;
 
@@ -17,7 +17,7 @@ public class Bidder {
     this.cashLeft = Settings.INITIAL_CASH;
   }
 
-  public Bid getBid(ReadOnlyAuctionState auctionState) {
+  public BiddersBid getBid(ReadOnlyAuctionState auctionState) {
     AuctionItem itemToBeBid = auctionState.getItemToBeBid();
 
     /**
@@ -27,10 +27,13 @@ public class Bidder {
      */
 
     float bidAmount = new Random().nextInt((int) cashLeft);
-    // todo make new Bid constructor
-    Bid result = new Bid(playerGuid, itemToBeBid.getIndex(),
-        itemToBeBid.getType(), bidAmount, 0);
+    BiddersBid result = new BiddersBid(playerGuid, itemToBeBid.getIndex(),
+        itemToBeBid.getType(), bidAmount);
     return result;
+  }
+
+  public void decrementCash(float amount) {
+    cashLeft -= amount;
   }
 
 }

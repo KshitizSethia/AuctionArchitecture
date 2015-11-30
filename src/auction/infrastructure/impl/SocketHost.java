@@ -1,6 +1,7 @@
 package auction.infrastructure.impl;
 
 import java.io.BufferedReader;
+import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -10,7 +11,6 @@ import java.net.Socket;
 import java.net.UnknownHostException;
 import java.nio.charset.StandardCharsets;
 
-import auction.common.Bid;
 import auction.common.Settings;
 
 public class SocketHost implements Runnable {
@@ -36,9 +36,12 @@ public class SocketHost implements Runnable {
       Socket socket = connectSocket();
 
       DataOutputStream out = new DataOutputStream(socket.getOutputStream());
+
       BufferedReader in =
           new BufferedReader(new InputStreamReader(socket.getInputStream(),
               StandardCharsets.UTF_8));
+
+      /* DataInputStream in = new DataInputStream(socket.getInputStream()); */
 
       while (player.isGameOn()) {
         if (player.canMove()) {
@@ -49,18 +52,19 @@ public class SocketHost implements Runnable {
           long startTime = System.nanoTime();
 
           // in format: authenticationID itemIndex itemType amount
-          // reading in 1 line at a time, so player can play multiple moves
-          // which can be queued
           String incomingMessage = in.readLine();
+          //FIXME this is a HACK, fix it
+          incomingMessage = incomingMessage.substring(2);
 
           float timeDiff = getMillisElapsedFrom(startTime);
 
           Log.info("Message from " + playerName + ":\n" + incomingMessage);
           try {
-            String[] parts = incomingMessage.split(" ");
+            String[] parts = incomingMessage.split(",");
 
-            player.placeBid(new Bid(parts[0], Integer.parseInt(parts[1]),
-                parts[2], Float.parseFloat(parts[3]), timeDiff));
+            Bid incomingBid = new Bid(parts[0], Integer.parseInt(parts[1]),
+                parts[2], Float.parseFloat(parts[3]), timeDiff);
+            player.placeBid(incomingBid);
             // bid successful
             out.writeUTF(Settings.BID_ACCEPTED);
             out.flush();
@@ -85,16 +89,17 @@ public class SocketHost implements Runnable {
   }
 
   private float getMillisElapsedFrom(long startTime) {
-    long endTime = System.nanoTime();
-    float timeDiff = (float) ((endTime - startTime) * 1e6);
+    final long endTime = System.nanoTime();
+    final float timeDiff = (float) ((endTime - startTime) / 1e6);
     Log.info(String.format("%s took %f time(millis)", playerName, timeDiff));
     return timeDiff;
   }
 
   private void sendCurrentStateToPlayer(DataOutputStream out)
       throws IOException {
-    String outgoingMessage = "START\n" + player.getGameState() + "\nEND\n";
-    Log.veryVerbose("Message to " + playerName + ":\n" + outgoingMessage);
+    String outgoingMessage =
+        /* "START\n" + */player.getGameState()/* + "\nEND\n" */;
+    Log.info("Message to " + playerName + ":\n" + outgoingMessage);
     out.writeUTF(outgoingMessage);
     out.flush();
   }

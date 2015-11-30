@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
-import auction.common.Bid;
+import auction.common.Error;
 import auction.infrastructure.api.IAuctionListener;
 import auction.infrastructure.api.IAuctionModel;
 

@@ -12,6 +12,9 @@ public class ReadOnlyAuctionState {
 
   public ReadOnlyAuctionState(String auctionStateString)
       throws FileNotFoundException {
+    // remove brackets used for pretty printing
+    auctionStateString = auctionStateString.replace("(", "").replace(")", "");
+
     auctionState = new AuctionState(new Scanner(auctionStateString));
   }
 
@@ -24,7 +27,7 @@ public class ReadOnlyAuctionState {
   }
 
   public AuctionItem getItemToBeBid() {
-    int minIndex = -1;
+    int minIndex = Integer.MAX_VALUE;
     AuctionItem chosenItem = null;
     for (AuctionItem item : auctionState.getItems()) {
       if (!item.isWon() && item.getIndex() < minIndex) {

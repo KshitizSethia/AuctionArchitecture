@@ -7,7 +7,6 @@ import java.util.UUID;
 
 import org.junit.Test;
 
-import auction.common.Bid;
 import auction.common.Settings;
 
 public class AuctionRunLocalTests {
