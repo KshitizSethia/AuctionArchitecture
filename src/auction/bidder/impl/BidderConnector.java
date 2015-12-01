@@ -16,25 +16,24 @@ public class BidderConnector {
 
   public static void main(String[] args)
       throws UnknownHostException, IOException {
-    if (args.length < 3) {
-      System.out.println("Usage: <player_name> <player_guid> <port>");
+    if (args.length < 2) {
+      System.out.println("Usage: <player_guid> <port>");
       System.exit(-1);
     }
 
-    String playerName = args[0];
-    String playerGuid = args[1];
-    int port = Integer.parseInt(args[2]);
+    String playerGuid = args[0];
+    int port = Integer.parseInt(args[1]);
 
     Bidder bidder = new Bidder(playerGuid);
-
-    Socket connector = new Socket(InetAddress.getLocalHost(), port);
-
-    DataOutputStream out = new DataOutputStream(connector.getOutputStream());
-    DataInputStream in = new DataInputStream(connector.getInputStream());
 
     boolean gameOn = true;
 
     while (gameOn) {
+      Socket connector = tryConnectingToServer(port);
+
+      DataOutputStream out = new DataOutputStream(connector.getOutputStream());
+      DataInputStream in = new DataInputStream(connector.getInputStream());
+
       String incomingMessage = in.readUTF();
       Log.info("Recieved from server\n" + incomingMessage);
 
@@ -47,6 +46,7 @@ public class BidderConnector {
       ReadOnlyAuctionState auctionState =
           new ReadOnlyAuctionState(incomingMessage);
       BiddersBid bid = bidder.getBid(auctionState);
+
       Log.info("sending bid: " + bid.toString());
       out.writeUTF(bid.toString() + "\n");
       out.flush();
@@ -59,7 +59,7 @@ public class BidderConnector {
         Log.severe("bid not accepted, error message: " + response);
 
         /**
-         * You can use the error code here to debug what you are doing
+         * You can use the error code here to debug what you are doing wrong
          */
         Error error = Error.valueOf(response);
         if (error == Error.PLAYER_NOT_ENOUGH_CASH
@@ -67,10 +67,24 @@ public class BidderConnector {
           gameOn = false;
         }
       }
+
+      out.close();
+      in.close();
+      connector.close();
     }
 
     Log.info("Bidder is exiting!");
-    connector.close();
+  }
+
+  private static Socket tryConnectingToServer(int port) {
+    Socket connector = null;
+    do {
+      try {
+        connector = new Socket(InetAddress.getLocalHost(), port);
+      } catch (Exception ignored) {
+      }
+    } while (connector == null);
+    return connector;
   }
 
 }

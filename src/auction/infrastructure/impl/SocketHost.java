@@ -1,7 +1,6 @@
 package auction.infrastructure.impl;
 
 import java.io.BufferedReader;
-import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -32,19 +31,14 @@ public class SocketHost implements Runnable {
   @Override
   public void run() {
     try {
-      // todo keep time running between connection drops
-      Socket socket = connectSocket();
-
-      DataOutputStream out = new DataOutputStream(socket.getOutputStream());
-
-      BufferedReader in =
-          new BufferedReader(new InputStreamReader(socket.getInputStream(),
-              StandardCharsets.UTF_8));
-
-      /* DataInputStream in = new DataInputStream(socket.getInputStream()); */
-
       while (player.isGameOn()) {
         if (player.canMove()) {
+          Socket socket = connectSocket();
+
+          DataOutputStream out = new DataOutputStream(socket.getOutputStream());
+          BufferedReader in =
+              new BufferedReader(new InputStreamReader(socket.getInputStream(),
+                  StandardCharsets.UTF_8));
 
           sendCurrentStateToPlayer(out);
 
@@ -53,31 +47,21 @@ public class SocketHost implements Runnable {
 
           // in format: authenticationID itemIndex itemType amount
           String incomingMessage = in.readLine();
-          //FIXME this is a HACK, fix it
-          incomingMessage = incomingMessage.substring(2);
-
           float timeDiff = getMillisElapsedFrom(startTime);
 
-          Log.info("Message from " + playerName + ":\n" + incomingMessage);
-          try {
-            String[] parts = incomingMessage.split(",");
+          // FIXME this is a HACK, fix it
+          incomingMessage = incomingMessage.substring(2);
 
-            Bid incomingBid = new Bid(parts[0], Integer.parseInt(parts[1]),
-                parts[2], Float.parseFloat(parts[3]), timeDiff);
-            player.placeBid(incomingBid);
-            // bid successful
-            out.writeUTF(Settings.BID_ACCEPTED);
-            out.flush();
-          } catch (IllegalStateException
-              | IllegalArgumentException inputError) {
-            // bid error, send message to player
-            out.writeUTF(inputError.getMessage() + "\n");
-            out.flush();
-          }
+          Log.info("Message from " + playerName + ":\n" + incomingMessage);
+
+          processBid(out, incomingMessage, timeDiff);
+
+          in.close();
+          out.close();
+          socket.close();
         }
       }
-      out.writeUTF(Settings.GAME_END);
-      out.flush();
+      sendGameEndMessage();
 
       serverSocket.close();
 
@@ -85,6 +69,34 @@ public class SocketHost implements Runnable {
     } catch (IOException ioException) {
       Log.severe("Exception in SocketHost for " + player
           + ". SocketHost is now exiting.\n" + ioException);
+    }
+  }
+
+  private void sendGameEndMessage() throws IOException, UnknownHostException {
+    Socket lastSocket = connectSocket();
+    DataOutputStream out = new DataOutputStream(lastSocket.getOutputStream());
+    out.writeUTF(Settings.GAME_END);
+    out.flush();
+
+    out.close();
+    lastSocket.close();
+  }
+
+  private void processBid(DataOutputStream out, String incomingMessage,
+      float timeDiff) throws IOException {
+    try {
+      String[] parts = incomingMessage.split(",");
+
+      Bid incomingBid = new Bid(parts[0], Integer.parseInt(parts[1]), parts[2],
+          Float.parseFloat(parts[3]), timeDiff);
+      player.placeBid(incomingBid);
+      // bid successful
+      out.writeUTF(Settings.BID_ACCEPTED);
+      out.flush();
+    } catch (IllegalStateException | IllegalArgumentException inputError) {
+      // bid error, send message to player
+      out.writeUTF(inputError.getMessage() + "\n");
+      out.flush();
     }
   }
 
