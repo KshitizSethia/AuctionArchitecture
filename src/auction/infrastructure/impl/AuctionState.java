@@ -9,6 +9,7 @@ import java.util.Scanner;
 
 import auction.common.AuctionItem;
 import auction.common.Error;
+import auction.infrastructure.api.IAuctionPlayer;
 
 public class AuctionState {
 

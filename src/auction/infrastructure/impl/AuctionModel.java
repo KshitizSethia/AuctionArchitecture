@@ -9,6 +9,7 @@ import java.util.Scanner;
 import auction.common.Error;
 import auction.infrastructure.api.IAuctionListener;
 import auction.infrastructure.api.IAuctionModel;
+import auction.infrastructure.api.IAuctionPlayer;
 
 public class AuctionModel implements IAuctionModel {
 

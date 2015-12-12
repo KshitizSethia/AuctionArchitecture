@@ -1,6 +1,7 @@
 package auction.infrastructure.impl;
 
 import auction.common.Settings;
+import auction.infrastructure.api.IAuctionPlayer;
 
 public class Player implements IAuctionPlayer {
 

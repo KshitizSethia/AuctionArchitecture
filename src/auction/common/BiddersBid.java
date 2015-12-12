@@ -3,6 +3,7 @@ package auction.common;
 import auction.infrastructure.impl.Bid;
 
 public class BiddersBid extends Bid {
+  //todo negative validation
 
   public BiddersBid(String authID, int itemIndex, String itemType,
       float amount) {
